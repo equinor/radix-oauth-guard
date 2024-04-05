@@ -1,11 +1,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/equinor/radix-oauth-guard/middleware"
@@ -36,7 +36,7 @@ func main() {
 
 	initLogger(opts)
 
-	Run(opts)
+	Run(context.Background(), opts)
 }
 
 func initLogger(opts Options) {
@@ -61,19 +61,14 @@ func initLogger(opts Options) {
 	zerolog.DefaultContextLogger = &logger
 }
 
-func Run(opts Options) {
+func Run(ctx context.Context, opts Options) {
 	log.Info().Interface("options", opts).Msg("Starting...")
 
-	subjectRegex, err := regexp.Compile(opts.SubjectRegex)
-	if err != nil {
-		log.Fatal().Str("regex", opts.SubjectRegex).Err(err).Msg("Failed to compile subject regex")
-	}
-
-	authoriation := middleware.NewAuthenticationFromConfig(opts.Issuer, opts.Audience, subjectRegex)
-	http.Handle("POST /auth", authoriation.Handler())
+	authHandler := middleware.AuthHandler(ctx, opts.SubjectRegex, opts.Issuer, opts.Audience)
+	http.Handle("POST /auth", authHandler)
 
 	log.Info().Msg("Starting server on :8000...")
-	err = http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":8000", nil)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal().Err(err).Msgf("listen: %s", err)
 	}
