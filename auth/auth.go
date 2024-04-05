@@ -38,13 +38,16 @@ func AuthHandler(subjectRegex *regexp.Regexp, verifier Verifier) http.Handler {
 		}
 
 		subject := token.Subject
-		if !subjectRegex.MatchString(subject) {
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
+		if subjectRegex.MatchString(subject) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("OK"))
+			log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
+			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("OK"))
-		log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte("Forbidden"))
+		log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
 		return
 	})
 }

@@ -83,6 +83,10 @@ func Run(ctx context.Context, opts Options) {
 
 	authHandler := auth.AuthHandler(subjectRegex, verifier)
 	http.Handle("POST /auth", authHandler)
+	http.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+		_, _ = w.Write([]byte("404 Not Found"))
+	}))
 
 	log.Info().Msg("Starting server on :8000...")
 	err = http.ListenAndServe(":8000", nil)
