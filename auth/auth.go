@@ -1,14 +1,12 @@
-package middleware
+package auth
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,25 +14,8 @@ var (
 	errInvalidAuthorizationHeader = errors.New("invalid Authorization header")
 )
 
-// AuthHandler returns a AuthHandler handler for the Authenitcation middleware
-func AuthHandler(ctx context.Context, subject, issuer, audience string) http.Handler {
-
-	subjectRegex, err := regexp.Compile(subject)
-	if err != nil {
-		log.Fatal().Str("regex", subject).Err(err).Msg("Failed to compile subject regex")
-	}
-
-	provider, err := oidc.NewProvider(ctx, issuer)
-	if err != nil {
-		log.Fatal().Err(err).Str("issuer", issuer).Msg("Failed to create oidc provider")
-		panic(err)
-	}
-
-	oidcConfig := &oidc.Config{
-		ClientID: audience,
-	}
-	verifier := provider.Verifier(oidcConfig)
-
+// AuthHandler returns a Handler to authenticate requests
+func AuthHandler(subjectRegex *regexp.Regexp, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
 

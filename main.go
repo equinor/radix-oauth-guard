@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 
-	"github.com/equinor/radix-oauth-guard/middleware"
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/equinor/radix-oauth-guard/auth"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -64,11 +66,26 @@ func initLogger(opts Options) {
 func Run(ctx context.Context, opts Options) {
 	log.Info().Interface("options", opts).Msg("Starting...")
 
-	authHandler := middleware.AuthHandler(ctx, opts.SubjectRegex, opts.Issuer, opts.Audience)
+	subjectRegex, err := regexp.Compile(opts.SubjectRegex)
+	if err != nil {
+		log.Fatal().Str("regex", opts.SubjectRegex).Err(err).Msg("Failed to compile subject regex")
+	}
+
+	provider, err := oidc.NewProvider(ctx, opts.Issuer)
+	if err != nil {
+		log.Fatal().Err(err).Str("issuer", opts.Issuer).Msg("Failed to create oidc provider")
+	}
+
+	oidcConfig := &oidc.Config{
+		ClientID: opts.Audience,
+	}
+	verifier := provider.Verifier(oidcConfig)
+
+	authHandler := auth.AuthHandler(subjectRegex, verifier)
 	http.Handle("POST /auth", authHandler)
 
 	log.Info().Msg("Starting server on :8000...")
-	err := http.ListenAndServe(":8000", nil)
+	err = http.ListenAndServe(":8000", nil)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal().Err(err).Msgf("listen: %s", err)
 	}
