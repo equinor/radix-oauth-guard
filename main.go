@@ -1,18 +1,14 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"io"
 	"net/http"
 	"os"
-	"os/signal"
 	"regexp"
-	"syscall"
 	"time"
 
 	"github.com/equinor/radix-oauth-guard/middleware"
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -26,42 +22,6 @@ type Options struct {
 
 	LogLevel  string `mapstructure:"log_level"`
 	LogPretty bool   `mapstructure:"log_pretty"`
-}
-
-func Run(opts Options) {
-	log.Info().Interface("options", opts).Msg("Starting...")
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-
-	subjectRegex, err := regexp.Compile(opts.SubjectRegex)
-	if err != nil {
-		log.Fatal().Str("regex", opts.SubjectRegex).Err(err).Msg("Failed to compile subject regex")
-	}
-	authoriation := middleware.NewAuthenticationFromConfig(opts.Issuer, opts.Audience, subjectRegex)
-
-	engine := newGinEngine(authoriation)
-	engine.Handle(http.MethodPost, "/auth", func(c *gin.Context) {
-		c.String(http.StatusOK, "OK")
-	})
-	server := &http.Server{Addr: ":8000", Handler: engine}
-	go func() {
-		log.Info().Msg("Starting server on :8000...")
-		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatal().Err(err).Msgf("listen: %s", err)
-		}
-	}()
-
-	<-ctx.Done()
-	stop()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).Msgf("Server forced to shutdown: %s", err)
-	}
-
-	log.Info().Msg("Server exiting")
 }
 
 func main() {
@@ -99,4 +59,24 @@ func initLogger(opts Options) {
 
 	log.Logger = logger
 	zerolog.DefaultContextLogger = &logger
+}
+
+func Run(opts Options) {
+	log.Info().Interface("options", opts).Msg("Starting...")
+
+	subjectRegex, err := regexp.Compile(opts.SubjectRegex)
+	if err != nil {
+		log.Fatal().Str("regex", opts.SubjectRegex).Err(err).Msg("Failed to compile subject regex")
+	}
+
+	authoriation := middleware.NewAuthenticationFromConfig(opts.Issuer, opts.Audience, subjectRegex)
+	http.Handle("POST /auth", authoriation.Handler())
+
+	log.Info().Msg("Starting server on :8000...")
+	err = http.ListenAndServe(":8000", nil)
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Fatal().Err(err).Msgf("listen: %s", err)
+	}
+
+	log.Info().Msg("Server exiting")
 }
