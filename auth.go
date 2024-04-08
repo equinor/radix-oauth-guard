@@ -44,8 +44,8 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		}
 
 		subject := token.Subject
-		subjectIndex := slices.Index(subjects, subject)
-		if subjectIndex == -1 {
+		found := slices.Contains(subjects, subject)
+		if !found {
 			w.WriteHeader(http.StatusForbidden)
 			_, _ = w.Write([]byte("Forbidden"))
 			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
