@@ -1,12 +1,14 @@
-package auth
+package main
 
 import (
+	"context"
 	"errors"
 	"net/http"
-	"regexp"
+	"slices"
 	"strings"
 	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/rs/zerolog/log"
 )
 
@@ -14,8 +16,12 @@ var (
 	errInvalidAuthorizationHeader = errors.New("invalid Authorization header")
 )
 
+type Verifier interface {
+	Verify(ctx context.Context, rawIDToken string) (*oidc.IDToken, error)
+}
+
 // AuthHandler returns a Handler to authenticate requests
-func AuthHandler(subjectRegex *regexp.Regexp, verifier Verifier) http.Handler {
+func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
 
@@ -38,16 +44,17 @@ func AuthHandler(subjectRegex *regexp.Regexp, verifier Verifier) http.Handler {
 		}
 
 		subject := token.Subject
-		if subjectRegex.MatchString(subject) {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte("OK"))
-			log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
+		subjectIndex := slices.Index(subjects, subject)
+		if subjectIndex == -1 {
+			w.WriteHeader(http.StatusForbidden)
+			_, _ = w.Write([]byte("Forbidden"))
+			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
 			return
 		}
 
-		w.WriteHeader(http.StatusForbidden)
-		_, _ = w.Write([]byte("Forbidden"))
-		log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("OK"))
+		log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
 		return
 	})
 }

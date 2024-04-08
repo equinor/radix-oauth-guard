@@ -1,15 +1,14 @@
-package auth_test
+package main_test
 
 import (
 	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"regexp"
 	"testing"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/equinor/radix-oauth-guard/auth"
+	guard "github.com/equinor/radix-oauth-guard"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,9 +19,9 @@ func (f FakeVerifier) Verify(ctx context.Context, rawIDToken string) (*oidc.IDTo
 }
 
 func TestAuthHandler(t *testing.T) {
-	handler := auth.AuthHandler(regexp.MustCompile("^radix$"), FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
+	handler := guard.AuthHandler([]string{"radix1", "radix2"}, FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
 		return &oidc.IDToken{
-			Subject: "radix",
+			Subject: "radix1",
 		}, nil
 	}))
 
@@ -35,9 +34,9 @@ func TestAuthHandler(t *testing.T) {
 	assert.Equal(t, `OK`, writer.Body.String())
 }
 func TestMissingAuthHeaderFails(t *testing.T) {
-	handler := auth.AuthHandler(regexp.MustCompile("^radix$"), FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
+	handler := guard.AuthHandler([]string{"radix1", "radix2"}, FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
 		return &oidc.IDToken{
-			Subject: "richard",
+			Subject: "radix-fake",
 		}, nil
 	}))
 
@@ -49,7 +48,7 @@ func TestMissingAuthHeaderFails(t *testing.T) {
 }
 
 func TestAuthFailureFails(t *testing.T) {
-	handler := auth.AuthHandler(regexp.MustCompile("^radix$"), FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
+	handler := guard.AuthHandler([]string{"radix1", "radix2"}, FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
 		return nil, errors.New("some error")
 	}))
 
@@ -62,7 +61,7 @@ func TestAuthFailureFails(t *testing.T) {
 }
 
 func TestInvalidJWTFails(t *testing.T) {
-	handler := auth.AuthHandler(regexp.MustCompile("^radix$"), FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
+	handler := guard.AuthHandler([]string{"radix1", "radix2"}, FakeVerifier(func(_ context.Context, _ string) (*oidc.IDToken, error) {
 		return &oidc.IDToken{
 			Subject: "radix-fail",
 		}, nil

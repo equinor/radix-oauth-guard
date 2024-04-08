@@ -6,11 +6,9 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/equinor/radix-oauth-guard/auth"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -18,12 +16,12 @@ import (
 )
 
 type Options struct {
-	Issuer       string `mapstructure:"issuer"`
-	Audience     string `mapstructure:"audience"`
-	SubjectRegex string `mapstructure:"subject_regex"`
-
-	LogLevel  string `mapstructure:"log_level"`
-	LogPretty bool   `mapstructure:"log_pretty"`
+	Issuer       string   `mapstructure:"issuer"`
+	Audience     string   `mapstructure:"audience"`
+	SubjectRegex string   `mapstructure:"subject_regex"`
+	LogLevel     string   `mapstructure:"log_level"`
+	LogPretty    bool     `mapstructure:"log_pretty"`
+	Subjects     []string `mapstructure:"subjects"`
 }
 
 func main() {
@@ -66,11 +64,6 @@ func initLogger(opts Options) {
 func Run(ctx context.Context, opts Options) {
 	log.Info().Interface("options", opts).Msg("Starting...")
 
-	subjectRegex, err := regexp.Compile(opts.SubjectRegex)
-	if err != nil {
-		log.Fatal().Str("regex", opts.SubjectRegex).Err(err).Msg("Failed to compile subject regex")
-	}
-
 	provider, err := oidc.NewProvider(ctx, opts.Issuer)
 	if err != nil {
 		log.Fatal().Err(err).Str("issuer", opts.Issuer).Msg("Failed to create oidc provider")
@@ -81,7 +74,7 @@ func Run(ctx context.Context, opts Options) {
 	}
 	verifier := provider.Verifier(oidcConfig)
 
-	authHandler := auth.AuthHandler(subjectRegex, verifier)
+	authHandler := AuthHandler(opts.Subjects, verifier)
 	http.Handle("POST /auth", authHandler)
 	http.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
