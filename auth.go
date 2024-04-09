@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -23,7 +24,14 @@ type Verifier interface {
 // AuthHandler returns a Handler to authenticate requests
 func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Trace().Interface("headers", r.Header).Msg("Request details")
+		log.Trace().Func(func(e *zerolog.Event) {
+			headers := r.Header.Clone()
+			headers.Del("Authorization")
+			if r.Header.Get("Authorization") != "" {
+				headers.Set("Authorization", "<REMOVED>")
+			}
+			e.Interface("headers", headers)
+		}).Msg("Request details")
 		t := time.Now()
 
 		auth := r.Header.Get("Authorization")
