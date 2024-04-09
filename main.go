@@ -27,9 +27,7 @@ type Options struct {
 func main() {
 	var opts Options
 
-	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
-	_ = viper.ReadInConfig()
 	if err := viper.Unmarshal(&opts); err != nil {
 		log.Fatal().Msg(err.Error())
 	}
