@@ -1,0 +1,31 @@
+# Default values for charts.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/equinor/radix-oauth-guard
+  tag: latest
+  pullPolicy: Always
+
+# Annotations to add to the Deployment
+deploymentAnnotations: {}
+# Extra pod labels
+podLabels: {}
+
+# Logging
+logLevel: info
+logPretty: "False"
+issuer: ""
+audience: ""
+subjects: []
+#  - "system:serviceaccount:monitor:prometheus-operator-prometheus"
+
+resources:
+  limits:
+    cpu: 50m
+    memory: 100Mi
+  requests:
+    cpu: 50m
+    memory: 100Mi
