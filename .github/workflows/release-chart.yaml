@@ -35,4 +35,4 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
-          charts_dir: charts/radix-oauth-guard
+          skip_existing: false
