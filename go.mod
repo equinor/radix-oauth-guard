@@ -5,9 +5,6 @@ go 1.22
 require (
 	github.com/coreos/go-oidc/v3 v3.10.0
 	github.com/rs/zerolog v1.32.0
-)
-
-require (
 	github.com/sethvargo/go-envconfig v1.0.1
 	github.com/stretchr/testify v1.8.4
 )
