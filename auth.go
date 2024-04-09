@@ -28,7 +28,7 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 			headers := r.Header.Clone()
 			headers.Del("Authorization")
 			if r.Header.Get("Authorization") != "" {
-				headers.Set("Authorization", "<REMOVED>")
+				headers.Set("Authorization", "!REMOVED!")
 			}
 			e.Interface("headers", headers)
 		}).Msg("Request details")
