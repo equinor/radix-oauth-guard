@@ -4,7 +4,7 @@ RUN apk update && \
     apk add bash jq alpine-sdk sed gawk git ca-certificates curl && \
     apk add --no-cache gcc musl-dev
 
-# WORKDIR /go/src/
+WORKDIR /go/src/
 
 # get dependencies
 COPY go.mod go.sum ./
