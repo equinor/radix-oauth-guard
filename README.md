@@ -2,6 +2,16 @@
 
 The Guard is a HTTP Server that responds to requests on http://localhost:8000/auth and authenticates the header `Authorization: Bearer JWT` against the configured ISSUER, AUDIENCE and authorizes the request agains a comma separated list of subjects.
 
+
+## How to use
+
+This application is designed to use with Forward Auth, specifically for ingress-nginx, enable with this annotation:
+```yaml
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: "http://oauth-guard.monitor.svc.cluster.local:8000/auth"
+```
+
 ## Configuration
 
  - `ISSUER` - Required. A issuer to verify JWT against. Must support the `${ISSUER}.well-known/openid-configuration` endpoint.
