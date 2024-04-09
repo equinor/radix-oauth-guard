@@ -27,7 +27,7 @@ func main() {
 	ctx := context.Background()
 	var opts Options
 	err := envconfig.Process(ctx, &opts)
-	initLogger(opts)
+	initLogger(&opts)
 
 	log.Info().Msg("Starting")
 	log.Info().Str("ISSUER", opts.Issuer).Send()
@@ -45,7 +45,7 @@ func main() {
 	Run(ctx, opts)
 }
 
-func initLogger(opts Options) {
+func initLogger(opts *Options) {
 	logLevel, err := zerolog.ParseLevel(opts.LogLevel)
 	if err != nil {
 		logLevel = zerolog.InfoLevel
@@ -55,6 +55,7 @@ func initLogger(opts Options) {
 	if logLevel == zerolog.NoLevel {
 		logLevel = zerolog.InfoLevel
 	}
+	opts.LogLevel = logLevel.String()
 
 	var logWriter io.Writer = os.Stderr
 	if opts.LogPretty {
