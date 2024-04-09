@@ -25,12 +25,14 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
 
+		event := log.Info().Str("method", r.Method).Str("path", r.URL.Path)
+
 		auth := r.Header.Get("Authorization")
 		jwt, err := parseAuthHeader(auth)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte("Forbidden"))
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
+			event.Err(err).Dur("elappsed_ms", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
 			return
 		}
 
@@ -39,7 +41,7 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte("Forbidden"))
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
+			event.Err(err).Dur("elappsed_ms", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
 			return
 		}
 
@@ -48,13 +50,13 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		if !found {
 			w.WriteHeader(http.StatusForbidden)
 			_, _ = w.Write([]byte("Forbidden"))
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
+			event.Err(err).Dur("elappsed_ms", time.Since(t)).Int("status", http.StatusForbidden).Str("sub", subject).Msg("Forbidden")
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
-		log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
+		event.Dur("elappsed_ms", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
 	})
 }
 

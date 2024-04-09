@@ -61,6 +61,7 @@ func initLogger(opts Options) {
 		logWriter = &zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.TimeOnly}
 	}
 
+	zerolog.DurationFieldUnit = time.Millisecond
 	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
 
 	log.Logger = logger
