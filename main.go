@@ -12,29 +12,37 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/spf13/viper"
+	"github.com/sethvargo/go-envconfig"
 )
 
 type Options struct {
-	Issuer       string   `mapstructure:"issuer"`
-	Audience     string   `mapstructure:"audience"`
-	SubjectRegex string   `mapstructure:"subject_regex"`
-	LogLevel     string   `mapstructure:"log_level"`
-	LogPretty    bool     `mapstructure:"log_pretty"`
-	Subjects     []string `mapstructure:"subjects"`
+	Issuer    string   `env:"ISSUER, required"`
+	Audience  string   `env:"AUDIENCE, required"`
+	LogLevel  string   `env:"LOG_LEVEL, default=info"`
+	LogPretty bool     `env:"LOG_PRETTY"`
+	Subjects  []string `env:"SUBJECTS, required"`
 }
 
 func main() {
+	ctx := context.Background()
 	var opts Options
+	err := envconfig.Process(ctx, &opts)
+	initLogger(opts)
 
-	viper.AutomaticEnv()
-	if err := viper.Unmarshal(&opts); err != nil {
+	log.Info().Msg("Starting")
+	log.Info().Str("ISSUER", opts.Issuer).Send()
+	log.Info().Str("AUDIENCE", opts.Audience).Send()
+	log.Info().Str("LOG_LEVEL", opts.LogLevel).Send()
+	log.Info().Bool("LOG_PRETTY", opts.LogPretty).Send()
+	log.Info().Strs("SUBJECTS", opts.Subjects).Send()
+
+	// Print any failures from proccessing ENV here,
+	// se we can see available options
+	if err != nil {
 		log.Fatal().Msg(err.Error())
 	}
 
-	initLogger(opts)
-
-	Run(context.Background(), opts)
+	Run(ctx, opts)
 }
 
 func initLogger(opts Options) {
@@ -60,7 +68,6 @@ func initLogger(opts Options) {
 }
 
 func Run(ctx context.Context, opts Options) {
-	log.Info().Interface("options", opts).Msg("Starting...")
 
 	provider, err := oidc.NewProvider(ctx, opts.Issuer)
 	if err != nil {
@@ -73,13 +80,9 @@ func Run(ctx context.Context, opts Options) {
 	verifier := provider.Verifier(oidcConfig)
 
 	authHandler := AuthHandler(opts.Subjects, verifier)
-	http.Handle("POST /auth", authHandler)
-	http.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(404)
-		_, _ = w.Write([]byte("404 Not Found"))
-	}))
+	http.Handle("/auth", authHandler)
 
-	log.Info().Msg("Starting server on :8000...")
+	log.Info().Msg("Listening on http://localhost:8000...")
 	err = http.ListenAndServe(":8000", nil)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal().Err(err).Msgf("listen: %s", err)
