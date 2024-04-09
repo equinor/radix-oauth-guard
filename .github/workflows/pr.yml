@@ -37,5 +37,7 @@ jobs:
     name: Lint Helm
     runs-on: ubuntu-latest
     steps:
-      - uses: azure/setup-helm@v4.1.0
-      - run: helm lint charts/radix-oauth-guard
+      - uses: azure/setup-helm@https://github.com/Azure/setup-helm/commit/b7246b12e77f7134dc2d460a3d5bad15bbe29390 # v4.1.0
+
+      - name: Helm Lint
+        run: helm lint charts/radix-oauth-guard
