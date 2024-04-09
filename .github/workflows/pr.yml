@@ -32,3 +32,10 @@ jobs:
         run: go mod download
       - name: Run Tests
         run: go test -cover `go list ./... | grep -v 'pkg/client'`
+
+  lint-helm:
+    name: Lint Helm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/setup-helm@v4.1.0
+      - run: helm lint charts/radix-oauth-guard
