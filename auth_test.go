@@ -44,7 +44,7 @@ func TestMissingAuthHeaderFails(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/auth", nil)
 	handler.ServeHTTP(writer, req)
 
-	assert.Equal(t, http.StatusForbidden, writer.Code)
+	assert.Equal(t, http.StatusUnauthorized, writer.Code)
 }
 
 func TestAuthFailureFails(t *testing.T) {
@@ -57,7 +57,7 @@ func TestAuthFailureFails(t *testing.T) {
 	req.Header.Set("Authorization", "Bearer abcdabcd")
 	handler.ServeHTTP(writer, req)
 
-	assert.Equal(t, http.StatusForbidden, writer.Code)
+	assert.Equal(t, http.StatusUnauthorized, writer.Code)
 }
 
 func TestInvalidJWTFails(t *testing.T) {
