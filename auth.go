@@ -55,7 +55,6 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("OK"))
 		log.Info().Dur("latency", time.Since(t)).Int("status", http.StatusOK).Str("sub", subject).Msg("Authorized")
-		return
 	})
 }
 
