@@ -23,6 +23,7 @@ type Verifier interface {
 // AuthHandler returns a Handler to authenticate requests
 func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Trace().Interface("headers", r.Header).Msg("Request details")
 		t := time.Now()
 
 		auth := r.Header.Get("Authorization")
