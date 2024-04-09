@@ -28,18 +28,18 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		auth := r.Header.Get("Authorization")
 		jwt, err := parseAuthHeader(auth)
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
+			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte("Forbidden"))
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Msg("Forbidden")
+			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
 			return
 		}
 
 		token, err := verifier.Verify(r.Context(), jwt)
 
 		if err != nil {
-			w.WriteHeader(http.StatusForbidden)
+			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte("Forbidden"))
-			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusForbidden).Msg("Forbidden")
+			log.Info().Err(err).Dur("latency", time.Since(t)).Int("status", http.StatusUnauthorized).Msg("Unauthorized")
 			return
 		}
 
