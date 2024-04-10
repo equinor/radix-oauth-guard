@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/aes"
 	"encoding/base64"
 	"errors"
 	"net/http"
@@ -29,7 +30,14 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 			headers := r.Header.Clone()
 			headers.Del("Authorization")
 			if authHeader := r.Header.Get("Authorization"); authHeader != "" {
-				authHeader = base64.StdEncoding.EncodeToString([]byte(authHeader))
+
+				secretKey := "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
+				aes, _ := aes.NewCipher([]byte(secretKey))
+
+				// Make a buffer the same length as plaintext
+				ciphertext := make([]byte, len(authHeader))
+				aes.Encrypt(ciphertext, []byte(authHeader))
+				authHeader = base64.StdEncoding.EncodeToString(ciphertext)
 				headers.Set("Authorization", authHeader)
 			}
 			e.Interface("headers", headers)
