@@ -71,8 +71,8 @@ jobs:
             go run . &
             GO_PID=$!
             sleep 2s
-            echo "${GH_TOKEN}"
-            CURL_RESPONSE=$(curl --write-out '%{http_code}' --silent --output /dev/null  --header "Authorization: Bearer $(echo GH_TOKEN | base64 -d)" http://localhost:8000/auth)
+            echo "$(GH_TOKEN | base64)"
+            CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${GH_TOKEN}" http://localhost:8000/auth)
             kill -9 $GO_PID
             echo "Curl status code: ${CURL_RESPONSE}!"
             :
