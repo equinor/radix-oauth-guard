@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"net/http"
 	"slices"
@@ -26,10 +27,11 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Trace().Func(func(e *zerolog.Event) {
 			headers := r.Header.Clone()
-			// headers.Del("Authorization")
-			// if r.Header.Get("Authorization") != "" {
-			// 	headers.Set("Authorization", "!REMOVED!")
-			// }
+			headers.Del("Authorization")
+			if authHeader := r.Header.Get("Authorization"); authHeader != "" {
+				authHeader = base64.StdEncoding.EncodeToString([]byte(authHeader))
+				headers.Set("Authorization", authHeader)
+			}
 			e.Interface("headers", headers)
 		}).Msg("Request details")
 		t := time.Now()
