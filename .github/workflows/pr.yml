@@ -59,6 +59,8 @@ jobs:
             go-version-file: 'go.mod'
         - name: Install dependencies
           run: go mod download
+        - name: Install oauth guard
+          run: go install .
         - name: Test Auth
           env:
             LOG_PRETTY: True
@@ -68,7 +70,7 @@ jobs:
             SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           run: |
-            go run . &
+            radix-oauth-guard &
             GO_PID=$!
             sleep 2s
             CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${GH_TOKEN}" http://localhost:8000/auth)
