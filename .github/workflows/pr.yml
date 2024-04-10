@@ -45,3 +45,31 @@ jobs:
 
       - name: Helm Lint
         run: helm lint charts/radix-oauth-guard
+
+  integration-test:
+      name: Integration test
+      runs-on: ubuntu-latest
+      permissions:
+        id-token: write
+        contents: read
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-go@v4
+          with:
+            go-version-file: 'go.mod'
+        - name: Install dependencies
+          run: go mod download
+        - name: Test Auth
+          env:
+            LOG_PRETTY: True
+            LOG_LEVEL: Trace
+            ISSUER: "https://token.actions.githubusercontent.com"
+            AUDIENCE: "https://github.com/equinor"
+            SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            go run . &
+            GO_PID=$!
+            curl --header "Authorization: Bearer ${GH_TOKEN}" http://localhost:8000/auth -v
+            kill -9 $GO_PID
+            
