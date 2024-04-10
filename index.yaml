@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   radix-oauth-guard:
   - apiVersion: v1
+    appVersion: 0.3.1
+    created: "2024-04-10T11:13:35.862566163Z"
+    description: Forward Auth to validate, authenticate and authorize JWT tokens
+    digest: 599f1e2db84dc3ec506f86f367dd2c0b8deb577a38387fd45daa5ae940c417c3
+    icon: https://radix.equinor.com/images/logos/logo.svg
+    name: radix-oauth-guard
+    urls:
+    - https://github.com/equinor/radix-oauth-guard/releases/download/radix-oauth-guard-0.3.1/radix-oauth-guard-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v1
     appVersion: 0.3.0
     created: "2024-04-09T13:30:37.701370663Z"
     description: Forward Auth to validate, authenticate and authorize JWT tokens
@@ -21,4 +31,4 @@ entries:
     urls:
     - https://github.com/equinor/radix-oauth-guard/releases/download/radix-oauth-guard-0.2.3/radix-oauth-guard-0.2.3.tgz
     version: 0.2.3
-generated: "2024-04-09T13:30:37.701381694Z"
+generated: "2024-04-10T11:13:35.862582363Z"
