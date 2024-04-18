@@ -89,7 +89,7 @@ jobs:
               local expected="${2}"
               local msg="${3}"
             
-              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
+              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
               printf "Test: %15s: Result %s == %s\n" ${msg} ${expected} ${CURL_RESPONSE}
             }
             
