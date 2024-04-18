@@ -106,7 +106,7 @@ jobs:
             
             assert "${GH_TOKEN}" "200" "Valid token is OK"
             assert "" "401" "No token is unauthorized"
-            assert "ABCD${GH_TOKEN}" "403" "Invalid token is forbidden"
+            assert "ABCD${GH_TOKEN}" "401" "Invalid token is unauthorized"
             assert "${INVALID_GH_TOKEN}" "403" "Wrong Audience is forbidden"
             
             kill -9 $GO_PID
