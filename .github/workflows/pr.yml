@@ -65,14 +65,12 @@ jobs:
         - uses: actions/github-script@v7
           id: get-id-token
           with:
-            script: |
-              return await core.getIDToken()
+            script: return await core.getIDToken()
             result-encoding: string
         - uses: actions/github-script@v7
           id: get-invalid-aud-id-token
           with:
-            script: |
-              return await core.getIDToken("invalid-audience")
+            script: return await core.getIDToken("invalid-audience")
             result-encoding: string
         - name: Test Auth
           env:
@@ -110,37 +108,12 @@ jobs:
             assert "${INVALID_GH_TOKEN}" "401" "Wrong Audience is unauthorized"
             
             kill -9 $GO_PID
-            :
-        - name: Test Wrong subject Auth
-          env:
-            LOG_PRETTY: True
-            LOG_LEVEL: Trace
-            ISSUER: "https://token.actions.githubusercontent.com"
-            AUDIENCE: "https://github.com/equinor"
-            SUBJECTS: repo:equinor/radix-oauth-guard:WRONG_SUBJECT
-            GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
-          run: |
-            function assert() {
-              local token="${1}"
-              local expected="${2}"
-              local msg="${3}"
             
-              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
-              printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
-            
-              if [ "${2}" != "${CURL_RESPONSE}" ]; then
-                printf "Failed\n\n"
-                exit 255
-              fi
-            
-              printf "OK\n\n"
-            }
-            
-            radix-oauth-guard &
+            # Test different subject
+            SUBJECTS=WRONG_SUBJECT radix-oauth-guard &
             GO_PID=$!
             sleep 2s
             
             assert "${GH_TOKEN}" "403" "Wrong Subject is Forbidden"
-            
             kill -9 $GO_PID
             :
