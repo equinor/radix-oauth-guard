@@ -90,7 +90,7 @@ jobs:
               local msg="${3}"
             
               CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
-              printf "Test: %15s: Result %s == %s\n" ${msg} ${expected} ${CURL_RESPONSE}
+              printf "Test: %15s: Result %s == %s\n" "${msg}" "${expected}" "${CURL_RESPONSE}"
             }
             
             radix-oauth-guard &
@@ -103,5 +103,4 @@ jobs:
             assert "${INVALID_GH_TOKEN}" "403" "Wrong Audience is forbidden"
             
             kill -9 $GO_PID
-            echo "Curl status code: ${CURL_RESPONSE}!"
             :
