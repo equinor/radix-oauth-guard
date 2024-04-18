@@ -90,7 +90,14 @@ jobs:
               local msg="${3}"
             
               CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
-              printf "Test: %15s: Result %s == %s\n" "${msg}" "${expected}" "${CURL_RESPONSE}"
+              printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
+            
+              if [ "${2}" != "${CURL_RESPONSE}" ]; then
+                printf "Failed\n"
+                exit 255
+              fi
+            
+              printf "OK\n"
             }
             
             radix-oauth-guard &
