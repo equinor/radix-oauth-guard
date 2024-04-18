@@ -140,7 +140,7 @@ jobs:
             GO_PID=$!
             sleep 2s
             
-            assert "${GH_TOKEN}" "200" "Wrong Subject is Forbidden"
+            assert "${GH_TOKEN}" "403" "Wrong Subject is Forbidden"
             
             kill -9 $GO_PID
             :
