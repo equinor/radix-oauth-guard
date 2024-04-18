@@ -80,7 +80,7 @@ jobs:
             LOG_LEVEL: Trace
             ISSUER: "https://token.actions.githubusercontent.com"
             AUDIENCE: "https://github.com/equinor"
-            SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
+            SUBJECTS: repo:equinor/radix-oauth-guard:pull_request,testmultiplesubjects
             GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
             INVALID_GH_TOKEN: ${{ steps.get-invalid-aud-id-token.outputs.result }}
           run: |
@@ -107,7 +107,40 @@ jobs:
             assert "${GH_TOKEN}" "200" "Valid token is OK"
             assert "" "401" "No token is unauthorized"
             assert "ABCD${GH_TOKEN}" "401" "Invalid token is unauthorized"
-            assert "${INVALID_GH_TOKEN}" "403" "Wrong Audience is forbidden"
+            assert "${INVALID_GH_TOKEN}" "401" "Wrong Audience is unauthorized"
+            
+            kill -9 $GO_PID
+            :
+        - name: Test Wrong subject Auth
+          env:
+            LOG_PRETTY: True
+            LOG_LEVEL: Trace
+            ISSUER: "https://token.actions.githubusercontent.com"
+            AUDIENCE: "https://github.com/equinor"
+            SUBJECTS: repo:equinor/radix-oauth-guard:WRONG_SUBJECT
+            GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
+          run: |
+            function assert() {
+              local token="${1}"
+              local expected="${2}"
+              local msg="${3}"
+            
+              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
+              printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
+            
+              if [ "${2}" != "${CURL_RESPONSE}" ]; then
+                printf "Failed\n"
+                exit 255
+              fi
+            
+              printf "OK\n"
+            }
+            
+            radix-oauth-guard &
+            GO_PID=$!
+            sleep 2s
+            
+            assert "${GH_TOKEN}" "200" "Wrong Subject is Forbidden"
             
             kill -9 $GO_PID
             :
