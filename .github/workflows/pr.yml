@@ -45,3 +45,75 @@ jobs:
 
       - name: Helm Lint
         run: helm lint charts/radix-oauth-guard
+
+  integration-test:
+      name: Integration test
+      runs-on: ubuntu-latest
+      permissions:
+        id-token: write
+        contents: read
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-go@v4
+          with:
+            go-version-file: 'go.mod'
+        - name: Install dependencies
+          run: go mod download
+        - name: Install oauth guard
+          run: go install .
+
+        - uses: actions/github-script@v7
+          id: get-id-token
+          with:
+            script: return await core.getIDToken()
+            result-encoding: string
+        - uses: actions/github-script@v7
+          id: get-invalid-aud-id-token
+          with:
+            script: return await core.getIDToken("invalid-audience")
+            result-encoding: string
+        - name: Test Auth
+          env:
+            LOG_PRETTY: True
+            LOG_LEVEL: Trace
+            ISSUER: "https://token.actions.githubusercontent.com"
+            AUDIENCE: "https://github.com/equinor"
+            SUBJECTS: repo:equinor/radix-oauth-guard:pull_request,testmultiplesubjects
+            GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
+            INVALID_GH_TOKEN: ${{ steps.get-invalid-aud-id-token.outputs.result }}
+          run: |
+            function assert() {
+              local token="${1}"
+              local expected="${2}"
+              local msg="${3}"
+            
+              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null --silent  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
+              printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
+            
+              if [ "${expected}" != "${CURL_RESPONSE}" ]; then
+                printf "Failed\n\n"
+                exit 255
+              fi
+            
+              printf "OK\n\n"
+            }
+            
+            radix-oauth-guard &
+            GO_PID=$!
+            sleep 2s
+            
+            assert "${GH_TOKEN}" "200" "Valid token is OK"
+            assert "" "401" "No token is unauthorized"
+            assert "ABCD${GH_TOKEN}" "401" "Invalid token is unauthorized"
+            assert "${INVALID_GH_TOKEN}" "401" "Wrong Audience is unauthorized"
+            
+            kill -9 $GO_PID
+            
+            # Test different subject
+            SUBJECTS=WRONG_SUBJECT radix-oauth-guard &
+            GO_PID=$!
+            sleep 2s
+            
+            assert "${GH_TOKEN}" "403" "Wrong Subject is Forbidden"
+            kill -9 $GO_PID
+            :
