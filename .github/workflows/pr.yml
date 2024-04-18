@@ -85,9 +85,9 @@ jobs:
             INVALID_GH_TOKEN: ${{ steps.get-invalid-aud-id-token.outputs.result }}
           run: |
             function assert() {
-              local $token="${1}"
-              local $expected="${1}"
-              local $msg="${2}"
+              local token="${1}"
+              local expected="${2}"
+              local msg="${3}"
             
               CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
               printf "Test: %15s: Result %s == %s\n" ${msg} ${expected} ${CURL_RESPONSE}
