@@ -2,10 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"net/http"
 	"slices"
@@ -31,11 +27,8 @@ func AuthHandler(subjects []string, verifier Verifier) http.Handler {
 		log.Trace().Func(func(e *zerolog.Event) {
 			headers := r.Header.Clone()
 			headers.Del("Authorization")
-			if authHeader := r.Header.Get("Authorization"); authHeader != "" {
-
-				secretKey := "N1PCdw3M2B1TfJhoaY2mL736p2vCUc47"
-				authHeader = base64.StdEncoding.EncodeToString([]byte(encrypt(authHeader, secretKey)))
-				headers.Set("Authorization", authHeader)
+			if r.Header.Get("Authorization") != "" {
+				headers.Set("Authorization", "!REMOVED!")
 			}
 			e.Interface("headers", headers)
 		}).Msg("Request details")
@@ -86,31 +79,4 @@ func parseAuthHeader(authorization string) (string, error) {
 	}
 
 	return token, nil
-}
-
-func encrypt(plaintext, secretKey string) string {
-	aes, err := aes.NewCipher([]byte(secretKey))
-	if err != nil {
-		panic(err)
-	}
-
-	gcm, err := cipher.NewGCM(aes)
-	if err != nil {
-		panic(err)
-	}
-
-	// We need a 12-byte nonce for GCM (modifiable if you use cipher.NewGCMWithNonceSize())
-	// A nonce should always be randomly generated for every encryption.
-	nonce := make([]byte, gcm.NonceSize())
-	_, err = rand.Read(nonce)
-	if err != nil {
-		panic(err)
-	}
-
-	// ciphertext here is actually nonce+ciphertext
-	// So that when we decrypt, just knowing the nonce size
-	// is enough to separate it from the ciphertext.
-	ciphertext := gcm.Seal(nonce, nonce, []byte(plaintext), nil)
-
-	return string(ciphertext)
 }
