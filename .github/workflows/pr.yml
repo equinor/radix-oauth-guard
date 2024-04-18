@@ -77,10 +77,21 @@ jobs:
             SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
             GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
           run: |
+            function assert() {
+              local $token="${1}"
+              local $expected="${1}"
+              local $msg="${2}"
+            
+              CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${token}" http://localhost:8000/auth)
+              printf "Test: %15s: Result %s == %s\n" ${msg} ${expected} ${CURL_RESPONSE}
+            }
+            
             radix-oauth-guard &
             GO_PID=$!
             sleep 2s
-            CURL_RESPONSE=$(curl --write-out '%{http_code}' --output /dev/null  --header "Authorization: Bearer ${GH_TOKEN}" http://localhost:8000/auth)
+            
+            assert "${GH_TOKEN}" "200" "Valid token is OK"
+            
             kill -9 $GO_PID
             echo "Curl status code: ${CURL_RESPONSE}!"
             :
