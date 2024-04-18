@@ -84,4 +84,3 @@ jobs:
             kill -9 $GO_PID
             echo "Curl status code: ${CURL_RESPONSE}!"
             :
-            
