@@ -61,6 +61,13 @@ jobs:
           run: go mod download
         - name: Install oauth guard
           run: go install .
+
+        - uses: actions/github-script@v7
+          id: get-id-token
+          with:
+            script: |
+              return await core.getIDToken()
+            result-encoding: string
         - name: Test Auth
           env:
             LOG_PRETTY: True
@@ -68,7 +75,7 @@ jobs:
             ISSUER: "https://token.actions.githubusercontent.com"
             AUDIENCE: "https://github.com/equinor"
             SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
           run: |
             radix-oauth-guard &
             GO_PID=$!
