@@ -68,6 +68,12 @@ jobs:
             script: |
               return await core.getIDToken()
             result-encoding: string
+        - uses: actions/github-script@v7
+          id: get-invalid-aud-id-token
+          with:
+            script: |
+              return await core.getIDToken("invalid-audience")
+            result-encoding: string
         - name: Test Auth
           env:
             LOG_PRETTY: True
@@ -76,6 +82,7 @@ jobs:
             AUDIENCE: "https://github.com/equinor"
             SUBJECTS: repo:equinor/radix-oauth-guard:pull_request
             GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
+            INVALID_GH_TOKEN: ${{ steps.get-invalid-aud-id-token.outputs.result }}
           run: |
             function assert() {
               local $token="${1}"
@@ -91,6 +98,9 @@ jobs:
             sleep 2s
             
             assert "${GH_TOKEN}" "200" "Valid token is OK"
+            assert "" "401" "No token is unauthorized"
+            assert "ABCD${GH_TOKEN}" "403" "Invalid token is forbidden"
+            assert "${INVALID_GH_TOKEN}" "403" "Wrong Audience is forbidden"
             
             kill -9 $GO_PID
             echo "Curl status code: ${CURL_RESPONSE}!"
