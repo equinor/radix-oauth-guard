@@ -93,11 +93,11 @@ jobs:
               printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
             
               if [ "${2}" != "${CURL_RESPONSE}" ]; then
-                printf "Failed\n"
+                printf "Failed\n\n"
                 exit 255
               fi
             
-              printf "OK\n"
+              printf "OK\n\n"
             }
             
             radix-oauth-guard &
@@ -129,11 +129,11 @@ jobs:
               printf "Test: %15s: Result %s == %s: " "${msg}" "${expected}" "${CURL_RESPONSE}"
             
               if [ "${2}" != "${CURL_RESPONSE}" ]; then
-                printf "Failed\n"
+                printf "Failed\n\n"
                 exit 255
               fi
             
-              printf "OK\n"
+              printf "OK\n\n"
             }
             
             radix-oauth-guard &
