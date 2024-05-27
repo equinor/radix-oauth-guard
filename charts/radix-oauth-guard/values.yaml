@@ -29,3 +29,12 @@ resources:
   requests:
     cpu: 50m
     memory: 100Mi
+
+# Affinity for pod scheduling
+affinity: {}
+
+# Node selector for pod scheduling
+nodeSelector: {}
+
+# Tolerations for pod scheduling
+tolerations: []  
