@@ -1,6 +1,15 @@
-apiVersion: v1
-appVersion: 0.3.1
-version: 0.3.1
-description: Forward Auth to validate, authenticate and authorize JWT tokens
+apiVersion: v2
 name: radix-oauth-guard
 icon: https://radix.equinor.com/images/logos/logo.svg
+description: Forward Auth to validate, authenticate and authorize JWT tokens
+appVersion: 0.3.1
+version: 0.4.0
+kubeVersion: ">=1.24.0"
+keywords:
+  - radix
+home: radix.equinor.com
+sources:
+  - https://github.com/equinor/radix-cicd-canary
+maintainers:
+  - name: Omnia Radix
+    email: Radix@StatoilSRM.onmicrosoft.com
