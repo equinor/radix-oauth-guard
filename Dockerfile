@@ -14,12 +14,14 @@ RUN go mod download
 COPY . .
 
 # Build project
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
 RUN  GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
 
 RUN addgroup -S -g 1000 guard
 RUN adduser -S -u 1000 -G guard guard
 
-FROM --platform=$TARGETPLATFORM scratch
+FROM --platform=$TARGETOS/$TARGETARCH scratch
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /etc/passwd /etc/passwd

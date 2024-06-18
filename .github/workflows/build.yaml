@@ -47,7 +47,9 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64
+          args: |
+            TARGETOS:linux
+            TARGETARCH:amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -56,6 +58,8 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/arm64
+          args: |
+            TARGETOS:linux
+            TARGETARCH:arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
