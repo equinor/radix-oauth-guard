@@ -1,9 +1,7 @@
 FROM --platform=$BUILDPLATFORM golang:1.22-alpine3.19 as builder
-
-RUN apk update && \
-    apk add bash jq alpine-sdk sed gawk git ca-certificates curl && \
-    apk add --no-cache gcc musl-dev
-
+# Define target arch variables so we can use them while crosscompiling, will be set automatically
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /go/src/
 
 # get dependencies
@@ -14,17 +12,12 @@ RUN go mod download
 COPY . .
 
 # Build project
-ARG TARGETOS=linux
-ARG TARGETARCH=amd64
-RUN  GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
 
-RUN addgroup -S -g 1000 guard
-RUN adduser -S -u 1000 -G guard guard
 
-FROM --platform=$TARGETOS/$TARGETARCH scratch
+FROM --platform=$TARGETPLATFORM scratch
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /radix-oauth-guard /radix-oauth-guard
 
 EXPOSE 8000
