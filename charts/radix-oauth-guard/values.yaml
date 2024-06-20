@@ -6,7 +6,7 @@ fullnameOverride: ""
 
 image:
   repository: ghcr.io/equinor/radix-oauth-guard
-  tag: latest
+  tag: ""
   pullPolicy: Always
 
 # Annotations to add to the Deployment
@@ -37,4 +37,4 @@ affinity: {}
 nodeSelector: {}
 
 # Tolerations for pod scheduling
-tolerations: []  
+tolerations: []
