@@ -3,92 +3,65 @@ package main
 import (
 	"context"
 	"errors"
-	"io"
+	"fmt"
 	"net/http"
-	"os"
+	"os/signal"
 	"time"
 
-	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"github.com/sethvargo/go-envconfig"
+	"github.com/urfave/negroni"
+	"golang.org/x/sys/unix"
 )
 
-type Options struct {
-	Issuer    string   `env:"ISSUER, required"`
-	Audience  string   `env:"AUDIENCE, required"`
-	LogLevel  string   `env:"LOG_LEVEL, default=info"`
-	LogPretty bool     `env:"LOG_PRETTY"`
-	Subjects  []string `env:"SUBJECTS, required"`
-}
-
 func main() {
-	ctx := context.Background()
-	var opts Options
-	err := envconfig.Process(ctx, &opts)
-	initLogger(&opts)
+	ctx, cancel := signal.NotifyContext(context.Background(), unix.SIGTERM, unix.SIGINT)
+	defer cancel()
 
-	log.Info().Msg("Starting")
-	log.Info().Str("ISSUER", opts.Issuer).Send()
-	log.Info().Str("AUDIENCE", opts.Audience).Send()
-	log.Info().Str("LOG_LEVEL", opts.LogLevel).Send()
-	log.Info().Bool("LOG_PRETTY", opts.LogPretty).Send()
-	log.Info().Strs("SUBJECTS", opts.Subjects).Send()
+	config := MustParseConfig()
 
-	// Print any failures from proccessing ENV here,
-	// se we can see available options
+	authHandler, err := NewAuthHandler(config.Audience, config.Subjects, config.Issuers)
 	if err != nil {
-		log.Fatal().Msg(err.Error())
+		log.Fatal().Err(err).Msg("Failed to create auth handler")
 	}
+	router := NewRouter(authHandler)
 
-	Run(ctx, opts)
+	err = Serve(ctx, config.Port, router)
+	log.Err(err).Msg("Terminated")
 }
 
-func initLogger(opts *Options) {
-	logLevel, err := zerolog.ParseLevel(opts.LogLevel)
-	if err != nil {
-		logLevel = zerolog.InfoLevel
-		log.Warn().Msgf("Invalid log level '%s', fallback to '%s'", opts.LogLevel, logLevel.String())
+type RouteMapper func(mux *http.ServeMux)
+
+func NewRouter(handlers ...RouteMapper) *negroni.Negroni {
+	mux := http.NewServeMux()
+	for _, handler := range handlers {
+		handler(mux)
 	}
 
-	if logLevel == zerolog.NoLevel {
-		logLevel = zerolog.InfoLevel
-	}
-	opts.LogLevel = logLevel.String()
-
-	var logWriter io.Writer = os.Stderr
-	if opts.LogPretty {
-		logWriter = &zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.TimeOnly}
-	}
-
-	zerolog.DurationFieldUnit = time.Millisecond
-	logger := zerolog.New(logWriter).Level(logLevel).With().Timestamp().Logger()
-
-	log.Logger = logger
-	zerolog.DefaultContextLogger = &logger
+	return negroni.New(
+		NewZerologRequestIdMiddleware(),
+		NewLoggingMiddleware(),
+		negroni.Wrap(mux),
+	)
 }
 
-func Run(ctx context.Context, opts Options) {
+func Serve(ctx context.Context, port int, router http.Handler) error {
 
-	provider, err := oidc.NewProvider(ctx, opts.Issuer)
-	if err != nil {
-		log.Fatal().Err(err).Str("issuer", opts.Issuer).Msg("Failed to create oidc provider")
+	s := &http.Server{
+		Handler: router,
+		Addr:    fmt.Sprintf(":%d", port),
 	}
+	go func() {
+		log.Ctx(ctx).Info().Msgf("Starting server on http://localhost:%d/", port)
 
-	oidcConfig := &oidc.Config{
-		ClientID: opts.Audience,
-	}
-	verifier := provider.Verifier(oidcConfig)
+		if err := s.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Ctx(ctx).Fatal().Msg(err.Error())
+		}
+	}()
 
-	authHandler := AuthHandler(opts.Subjects, verifier)
-	http.Handle("/auth", authHandler)
+	<-ctx.Done()
 
-	log.Info().Msg("Listening on http://localhost:8000...")
-	err = http.ListenAndServe(":8000", nil)
-	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal().Err(err).Msgf("listen: %s", err)
-	}
+	shutdownCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer cancel()
 
-	log.Info().Msg("Server exiting")
+	return s.Shutdown(shutdownCtx)
 }
