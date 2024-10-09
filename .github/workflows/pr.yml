@@ -76,7 +76,7 @@ jobs:
           env:
             LOG_PRETTY: True
             LOG_LEVEL: Trace
-            ISSUER: "https://token.actions.githubusercontent.com"
+            ISSUERS: "https://token.actions.githubusercontent.com"
             AUDIENCE: "https://github.com/equinor"
             SUBJECTS: repo:equinor/radix-oauth-guard:pull_request,testmultiplesubjects
             GH_TOKEN: ${{ steps.get-id-token.outputs.result }}
