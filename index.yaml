@@ -2,6 +2,25 @@ apiVersion: v1
 entries:
   radix-oauth-guard:
   - apiVersion: v2
+    appVersion: 1.0.1
+    created: "2024-12-16T14:36:36.69460034Z"
+    description: Forward Auth to validate, authenticate and authorize JWT tokens
+    digest: f5c616c870d7bceafc2a257895f6083c0a0530bbd2727bb5d6aac4af705cef43
+    home: radix.equinor.com
+    icon: https://radix.equinor.com/images/logos/logo.svg
+    keywords:
+    - radix
+    kubeVersion: '>=1.24.0'
+    maintainers:
+    - email: Radix@StatoilSRM.onmicrosoft.com
+      name: Omnia Radix
+    name: radix-oauth-guard
+    sources:
+    - https://github.com/equinor/radix-cicd-canary
+    urls:
+    - https://github.com/equinor/radix-oauth-guard/releases/download/radix-oauth-guard-1.0.1/radix-oauth-guard-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     appVersion: 1.0.0
     created: "2024-06-27T08:40:57.215269987Z"
     description: Forward Auth to validate, authenticate and authorize JWT tokens
@@ -107,4 +126,4 @@ entries:
     urls:
     - https://github.com/equinor/radix-oauth-guard/releases/download/radix-oauth-guard-0.2.3/radix-oauth-guard-0.2.3.tgz
     version: 0.2.3
-generated: "2024-06-27T08:40:57.21531978Z"
+generated: "2024-12-16T14:36:36.694632099Z"
