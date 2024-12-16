@@ -2,8 +2,8 @@ apiVersion: v2
 name: radix-oauth-guard
 icon: https://radix.equinor.com/images/logos/logo.svg
 description: Forward Auth to validate, authenticate and authorize JWT tokens
-version: 1.0.1
-appVersion: 1.0.1 # appVersion should always be equal to version!
+version: 1.0.2
+appVersion: 1.0.2 # appVersion should always be equal to version!
 kubeVersion: ">=1.24.0"
 keywords:
   - radix
