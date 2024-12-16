@@ -1,3 +1,5 @@
+[![SCM Compliance](https://scm-compliance-api.radix.equinor.com/repos/equinor/radix-api/badge)](https://developer.equinor.com/governance/scm-policy/)
+
 # Radix Oauth Guard
 
 The Guard is a HTTP Server that responds to requests on http://localhost:8000/auth and authenticates the header `Authorization: Bearer JWT` against the configured ISSUER, AUDIENCE and authorizes the request agains a comma separated list of subjects.
