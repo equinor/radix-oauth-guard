@@ -1,7 +1,13 @@
-FROM --platform=$BUILDPLATFORM golang:1.22-alpine3.20 as builder
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine3.22 AS builder
 # Define target arch variables so we can use them while crosscompiling, will be set automatically
 ARG TARGETOS
 ARG TARGETARCH
+
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=${TARGETARCH} \
+    GOOS=${TARGETOS}
+
 WORKDIR /go/src/
 
 # get dependencies
@@ -12,13 +18,9 @@ RUN go mod download
 COPY . .
 
 # Build project
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
+RUN go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
 
-
-FROM --platform=$TARGETPLATFORM scratch
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /radix-oauth-guard /radix-oauth-guard
+FROM gcr.io/distroless/static
 
 EXPOSE 8000
 USER 1000
