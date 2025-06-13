@@ -22,6 +22,8 @@ RUN go build -ldflags "-s -w" -a -installsuffix cgo -o /radix-oauth-guard
 
 FROM gcr.io/distroless/static
 
+COPY --from=builder /radix-oauth-guard /radix-oauth-guard
+
 EXPOSE 8000
 USER 1000
 ENTRYPOINT ["/radix-oauth-guard"]
