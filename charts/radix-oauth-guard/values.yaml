@@ -5,7 +5,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: ghcr.io/equinor/radix-oauth-guard
+  repository: ghcr.io/equinor/radix/oauth-guard
   tag: ""
   pullPolicy: Always
 
