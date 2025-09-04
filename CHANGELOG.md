@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - *(ci)* Improve release process - ([329a1cc](https://github.com/equinor/radix-oauth-guard/commit/329a1cc819269ff55991f6cafd371314b42f64ec)) by @nilsgstrabo in [#22](https://github.com/equinor/radix-oauth-guard/pull/22)
 
 
+## New Contributors ❤️
+
+* @github-actions[bot] made their first contribution in [#24](https://github.com/equinor/radix-oauth-guard/pull/24)
 ## [radix-oauth-guard-1.0.4](https://github.com/equinor/radix-oauth-guard/compare/v1.0.3..radix-oauth-guard-1.0.4) - 2025-06-13
 
 ### 🐛 Bug Fixes
