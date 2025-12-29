@@ -60,7 +60,6 @@ It then creates two pull requests:
 
 - one for the new stable version (e.g. `1.2.3`), and  
 - one for a pre-release version where `-rc.[number]` is appended (e.g. `1.2.3-rc.1`).
-
 ---
 
 Merging either of these pull requests triggers the **Create releases and tags** workflow.  
