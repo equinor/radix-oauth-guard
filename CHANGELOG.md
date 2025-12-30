@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1](https://github.com/equinor/radix-oauth-guard/compare/v1.1.0..v1.1.1) - 2025-12-30
+
+### 🐛 Bug Fixes
+
+- Bump dependencies - ([c3ad6f5](https://github.com/equinor/radix-oauth-guard/commit/c3ad6f5567fdbe66c8067dea0fc6cb9964256089)) by @dependabot[bot] in [#26](https://github.com/equinor/radix-oauth-guard/pull/26)
+
+
 ## [1.1.0](https://github.com/equinor/radix-oauth-guard/compare/radix-oauth-guard-1.0.4..v1.1.0) - 2025-09-04
 
 ### 🚀 Features
@@ -9,6 +16,9 @@ All notable changes to this project will be documented in this file.
 - *(ci)* Improve release process - ([329a1cc](https://github.com/equinor/radix-oauth-guard/commit/329a1cc819269ff55991f6cafd371314b42f64ec)) by @nilsgstrabo in [#22](https://github.com/equinor/radix-oauth-guard/pull/22)
 
 
+## New Contributors ❤️
+
+* @github-actions[bot] made their first contribution in [#24](https://github.com/equinor/radix-oauth-guard/pull/24)
 ## [radix-oauth-guard-1.0.4](https://github.com/equinor/radix-oauth-guard/compare/v1.0.3..radix-oauth-guard-1.0.4) - 2025-06-13
 
 ### 🐛 Bug Fixes
