@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.1](https://github.com/equinor/radix-oauth-guard/compare/v1.1.0..v1.1.1) - 2025-12-30
+## [1.1.1](https://github.com/equinor/radix-oauth-guard/compare/v1.1.0..v1.1.1) - 2026-01-05
 
 ### 🐛 Bug Fixes
 
