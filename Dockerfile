@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.25.5-alpine3.23 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.7-alpine3.23 AS builder
 # Define target arch variables so we can use them while crosscompiling, will be set automatically
 ARG TARGETOS
 ARG TARGETARCH
