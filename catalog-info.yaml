@@ -1,0 +1,13 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: radix-oauth-guard
+  title: Radix OAuth Guard
+  description: "Forward Auth to validate, authenticate and authorize JWT tokens"
+  annotations:
+    github.com/project-slug: equinor/radix-oauth-guard
+spec:
+  type: tool
+  lifecycle: production
+  owner: team-radix
+  system: system:default/Radix
