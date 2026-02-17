@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.1](https://github.com/equinor/radix-oauth-guard/compare/v1.1.0..v1.1.1) - 2025-12-30
+## [1.1.2](https://github.com/equinor/radix-oauth-guard/compare/v1.1.1..v1.1.2) - 2026-02-17
+
+### 🐛 Bug Fixes
+
+- *(deps)* Update Go version to 1.25.7 (#32) - ([5f3debb](https://github.com/equinor/radix-oauth-guard/commit/5f3debbdd52e548411c67639a8aa9eb9c4ad016a)) by @nilsgstrabo in [#32](https://github.com/equinor/radix-oauth-guard/pull/32)
+
+
+## [1.1.1](https://github.com/equinor/radix-oauth-guard/compare/v1.1.0..v1.1.1) - 2026-01-05
 
 ### 🐛 Bug Fixes
 
