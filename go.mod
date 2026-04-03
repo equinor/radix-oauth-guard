@@ -4,7 +4,6 @@ go 1.25.7
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0
-	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.34.0
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/stretchr/testify v1.11.1
@@ -12,7 +11,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
